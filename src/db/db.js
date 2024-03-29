@@ -1,25 +1,24 @@
-import mongoose from "mongoose";
-import {DB_NAME} from '../constants.js'
+import mongoose from "mongoose"
 
-import express from "express";
-const app = express();
+import {DB_NAME} from "../constants.js";
 
-app.listen(process.env.PORT,()=>{
-    console.log(`server running on Port ${process.env.PORT}`);
-    
-})
+import { app } from "../app.js";
+
+
 
 const connectDB = async() =>{
   try {
-   const connectioninstance = await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`)
-   console.log(`MONGODB CONNECTED || DB HOST`, connectioninstance.connection.host);
-   app.on("error",(error)=>{
-   console.log(`error ${error} in Mongodb Connection try block`)
-   })
+    let connectionMongoDB =  await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`);
+    console.log('MONGODB CONNECTED IN TRY BLOCK',connectionMongoDB.connection.host);
+    app.on("error",(error)=>{
+    console.log("ERROR IN TRY BLOCK",error)
+    })
+    
+
   } catch (error) {
-    console.log("MONGODB CONNECTION ERROR",error)
-    process.exit(1);
+    console.log("MONGO DB CONNECTION ERROR",error);
+    process.exit(1)
   }
 }
 
-export default connectDB
+export default connectDB;
