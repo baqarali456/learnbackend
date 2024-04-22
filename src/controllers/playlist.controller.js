@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Playlist } from "../models/playlist.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { Video } from "../models/video.model.js";
 
 
 
@@ -87,11 +88,78 @@ const getPlaylistById = asyncHandler(async(req,res)=>{
 
 const addVideoToPlayList = asyncHandler(async(req,res)=>{
     const {playlistId,videoId} = req.params
+    if(!playlistId || !videoId){
+        throw new ApiError(401,"playlist and vidoeId are required");
+    }
+   const isValidplayListId =  isValidObjectId(playlistId)
+   console.log(isValidplayListId)
+   
+   const isValidvideoId = isValidObjectId(videoId)
+   console.log(isValidvideoId)
+   
+   if(!isValidplayListId){
+    throw new ApiError(401,"playList id is not valid")
+   }
+   if(!isValidvideoId){
+    throw new ApiError(401,"playList id is not valid")
+   }
 
+   const user = await User.findById(req.user?._id);
+   if(!user){
+    throw new ApiError(401,"please login for add videos in playlist");
+   }
+
+  
+
+    const playlist = await Playlist.findById(playlistId)
+     const video = await Video.findById(videoId);
+     playlist.videos.push(video._id);
+      await playlist.save({validateBeforeSave:false})
+     return res
+     .status(200)
+     .json(
+        new ApiResponse(200,playlist,"add video successfully")
+     )
 })
 
 const removeVideoFromPlayList = asyncHandler(async(req,res)=>{
     const {playlistId,videoId} = req.params
+
+    if(!playlistId || !videoId){
+        throw new ApiError(401,"playlist and vidoeId are required");
+    }
+   const isValidplayListId =  isValidObjectId(playlistId)
+   console.log(isValidplayListId)
+   
+   const isValidvideoId = isValidObjectId(videoId)
+   console.log(isValidvideoId)
+   
+   if(!isValidplayListId){
+    throw new ApiError(401,"playList id is not valid")
+   }
+   if(!isValidvideoId){
+    throw new ApiError(401,"playList id is not valid")
+   }
+
+   const user = await User.findById(req.user?._id);
+   if(!user){
+    throw new ApiError(401,"please login for add videos in playlist");
+   }
+    const playlist = await Playlist.findById(playlistId);
+     
+     
+      const videos = playlist.videos.filter(id=>{
+        return id.toString() !== videoId
+      })  
+         
+       playlist.videos = videos;
+      await playlist.save({validateBeforeSave:false})
+ 
+      return res
+      .status(200)
+      .json(
+        new ApiResponse(200,playlist,"successfully deleted video from playlist")
+      )
 
 })
 
