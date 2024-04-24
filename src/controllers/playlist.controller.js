@@ -11,10 +11,6 @@ import { Video } from "../models/video.model.js";
 const createPlaylist = asyncHandler(async (req, res) => {
     const { name, description } = req.body;
 
-    const user = await User.findById(req.user?._id)
-    if (!user) {
-        throw new ApiError(401, "please login for create Playlist")
-    }
     if (!name || !description) {
         throw new ApiError(401, "name and description are required")
     }
@@ -43,10 +39,7 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
     if (!isvaliduserId) {
         throw new ApiError(401, "userId is not valid")
     }
-    const user = await User.findById(req.user?._id);
-    if (!user) {
-        throw new ApiError(401, "please login for get playlist")
-    }
+    
 
     const findUserPlaylist = await Playlist.find({ owner: userId }, { videos: 1, name: 1, description: 1, _id: 0 });
 
@@ -71,10 +64,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
     if (!isvaliduserId) {
         throw new ApiError(401, "userId is not valid")
     }
-    const user = await User.findById(req.user?._id);
-    if (!user) {
-        throw new ApiError(401, "please login for get playlist")
-    }
+   
 
     const findUserPlaylist = await Playlist.findOne({ _id: playlistId }, { videos: 1, name: 1, description: 1, _id: 0 });
 
@@ -103,13 +93,6 @@ const addVideoToPlayList = asyncHandler(async (req, res) => {
     if (!isValidvideoId) {
         throw new ApiError(401, "playList id is not valid")
     }
-
-    const user = await User.findById(req.user?._id);
-    if (!user) {
-        throw new ApiError(401, "please login for add videos in playlist");
-    }
-
-
 
     const playlist = await Playlist.findById(playlistId)
     const video = await Video.findById(videoId);
@@ -141,10 +124,7 @@ const removeVideoFromPlayList = asyncHandler(async (req, res) => {
         throw new ApiError(401, "playList id is not valid")
     }
 
-    const user = await User.findById(req.user?._id);
-    if (!user) {
-        throw new ApiError(401, "please login for add videos in playlist");
-    }
+    
     const playlist = await Playlist.findById(playlistId);
 
 
@@ -173,10 +153,7 @@ const deletePlaylist = asyncHandler(async (req, res) => {
         throw new ApiError(401, "playList id is not valid ")
     }
 
-    const user = await User.findById(req.user?._id)
-    if (!user) {
-        throw new ApiError(404, "Please login for delete Playlist")
-    }
+    
 
     const playlist = await Playlist.deleteOne({ _id: playlistId })
     return res
@@ -200,10 +177,7 @@ const updatePlaylist = asyncHandler(async (req, res) => {
         throw new ApiError(401, "name and description are required")
     }
 
-    const user = await User.findById(req.user?._id)
-    if (!user) {
-        throw new ApiError(404, "Please login for delete Playlist")
-    }
+    
 
     const playlist =  await Playlist.findByIdAndUpdate(
         playlistId,

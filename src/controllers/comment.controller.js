@@ -2,7 +2,6 @@ import mongoose,{isValidObjectId} from "mongoose";
 import { asyncHandler } from "../utils/asynchandler.js";
 import { Comment } from "../models/comment.model.js";
 import { ApiError } from "../utils/ApiError.js";
-import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Video } from "../models/video.model.js";
 
@@ -62,18 +61,12 @@ const addComment = asyncHandler(async(req,res)=>{
     if(!content?.trim()){
         throw new ApiError(404,"content is required")
     }
-    const user = await User.findById(req.user?._id)
-    if(!user){
-        throw new ApiError(401,"please login for add Comment")
-    }
-
       const video = await Video.findById(videoId)
 
     const comment = await Comment.create({
         content,
         video:video?._id,
         owner:req.user?._id,
-
     });
 
     return res
@@ -98,10 +91,7 @@ const updateComment = asyncHandler(async(req,res)=>{
     if(!isValidcommentId){
         throw new ApiError(401,"comment Id is not Valid")
     }
-    const user = await User.findById(req.user?._id)
-    if(!user){
-        throw new ApiError(401,"please login for add Comment")
-    }
+    
 
     const comment =  await Comment.findByIdAndUpdate(
         commentId,
@@ -134,10 +124,7 @@ const deleteComment = asyncHandler(async(req,res)=>{
     if(!isValidcommentId){
         throw new ApiError(401,"comment Id is not Valid")
     }
-    const user = await User.findById(req.user?._id)
-    if(!user){
-        throw new ApiError(401,"please login for add Comment")
-    }
+    
 
     const comment = await Comment.deleteOne({_id:commentId})
     console.log(comment)
