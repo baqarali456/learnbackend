@@ -28,10 +28,18 @@ const createTweet = asyncHandler(async (req, res) => {
 
 const getUserTweets = asyncHandler(async (req, res) => {
   // get user all tweets
+  const {userId} = req.params;
+  if(!userId?.trim()){
+    throw new ApiError(401,"userId is required")
+  }
+  const isValiduserId =  isValidObjectId(userId)
+  if(!isValiduserId){
+    throw new ApiError(404,"validuserId is not valid")
+  }
   const alluserTweets = await User.aggregate([
    {
     $match:{
-      _id: new mongoose.Schema.Types.ObjectId(req.user?._id),
+      _id: new mongoose.Schema.Types.ObjectId(userId),
     }
    },
    {
@@ -39,19 +47,19 @@ const getUserTweets = asyncHandler(async (req, res) => {
       from:"tweets",
       localField:"_id",
       foreignField:"owner",
-      as:"UserComments"
+      as:"UserTweets"
     }
    },
    {
     $addFields:{
-      UserComments:{
-        $first:"$UserComments"
+      UserTweets:{
+        $first:"$UserTweets"
       }
     }
    },
    {
     $project:{
-      UserComments:1,
+      UserTweets:1,
     }
    }
   ])
