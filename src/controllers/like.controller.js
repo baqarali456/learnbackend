@@ -150,7 +150,7 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
         content: 1,
       },
     },
-  ]);
+  ])
 
   return res
     .status(200)
@@ -163,7 +163,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     const LikedVideos = await User.aggregate([
       {
         $match: {
-          _id: new mongoose.Schema.Types.ObjectId(req.user?._id),
+          _id: new mongoose.Schema.Types.ObjectId(req.user._id),
         },
       },
       {
@@ -172,6 +172,34 @@ const getLikedVideos = asyncHandler(async (req, res) => {
           localField: "_id",
           foreignField: "likedBy",
           as: "getLikedVideos",
+          pipeline:[
+            {
+              $lookup:{
+                from:"videos",
+                localField:"video",
+                foreignField:"_id",
+                as:"video",
+                pipeline:[
+                  {
+                    $project:{
+                      title:1,
+                      description:1,
+                      videoFile:1,
+                      thumbnail:1,
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              $addFields:{
+                video:{
+                  $first:"$video"
+                }
+              }
+            }
+            
+          ]
         },
       },
       {
@@ -183,7 +211,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
       },
       {
         $project:{
-          getLikedVideos:1,
+          video:1,
         }
       }
     ]);
