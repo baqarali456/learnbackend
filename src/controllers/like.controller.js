@@ -55,7 +55,7 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, VideoLikestoggle[0], "fetch videoLike Toggle"));
+    .json(new ApiResponse(200, VideoLikestoggle[0].isLikeVideo, "fetch videoLike Toggle"));
 });
 
 
@@ -70,7 +70,7 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     throw new ApiError(404, "commentId is not valid");
   }
 
-  const VideoLikestoggle = await Comment.aggregate([
+  const CommentLikestoggle = await Comment.aggregate([
     {
       $match: {
         _id: new mongoose.Schema.Types.ObjectId(commentId),
@@ -105,7 +105,8 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, VideoLikestoggle, "fetch videoLike Toggle"));
+    .json(new ApiResponse(200, CommentLikestoggle
+      , "fetch videoLike Toggle"));
 });
 
 const toggleTweetLike = asyncHandler(async (req, res) => {
@@ -119,7 +120,7 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     throw new ApiError(404, "tweetId is not valid");
   }
 
-  const VideoLikestoggle = await Tweet.aggregate([
+  const toggleTweetLike = await Tweet.aggregate([
     {
       $match: {
         _id: new mongoose.Schema.Types.ObjectId(tweetId),
@@ -154,7 +155,7 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, VideoLikestoggle, "fetch videoLike Toggle"));
+    .json(new ApiResponse(200, toggleTweetLike, "fetch videoLike Toggle"));
 });
 
 const getLikedVideos = asyncHandler(async (req, res) => {

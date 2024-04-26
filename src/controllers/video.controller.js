@@ -8,6 +8,9 @@ import { User } from "../models/user.model.js";
 
 const getAllVideos = asyncHandler(async(req,res)=>{
     const {page = 1,limit=20,query,sortBy,sortType,userId} = req.query;
+    await Video.aggregatePaginate([
+
+    ])
 })
 
 const publishAVideo = asyncHandler(async(req,res)=>{
@@ -41,6 +44,7 @@ const publishAVideo = asyncHandler(async(req,res)=>{
       title,
       description,
       duration:videoFile?.duration,
+      owner:req.user._id
       
     })
 
@@ -59,7 +63,11 @@ const getVideoById = asyncHandler(async(req,res)=>{
     if(!videoId?.trim()){
         throw new ApiError(401,"videoId is required")
     }
-
+    
+    const isValidVideoId =  isValidObjectId(videoId)
+    if(!isValidVideoId){
+        throw new ApiError(404,"videoId is not valid")
+    }
 
     //Todo:get video By ID
      const video = await Video.findById(videoId);
