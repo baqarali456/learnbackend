@@ -16,35 +16,26 @@ const getVideoComments = asyncHandler(async(req,res)=>{
     if(!isValidVideoId){
         throw new ApiError(401,"video Id is not valid")
     }
-    if(!page){
-        throw new ApiError(401,"page is required")
-    }
-    if(!limit){
-        throw new ApiError(401,"limit is required")
-    }
-
-    const video = await Video.findById(videoId)
-
-
-  const getComments = await Comment.aggregate([
+     
+    const allcommentsonVideo = await Comment.aggregate([
         {
             $match:{
-                videos:video?._id,
+                video:new mongoose.Schema.Types.ObjectId(videoId)
             }
         },
         {
-          $addFields:{
-            NoofComments:{
-                $limit:10
-            },
-          }
+          $limit: parseInt(limit) 
+        },
+        {
+            $skip:(page - 1) * limit,
         }
     ])
 
-    if(!getComments?.length){
-        throw new ApiError(401,"comments doesn't exist")
-    }
     return res
+    .status(200)
+    .json(
+        new ApiResponse(200,allcommentsonVideo,"get successfully comments on video")
+    )
 })
 
 const addComment = asyncHandler(async(req,res)=>{
@@ -93,7 +84,7 @@ const updateComment = asyncHandler(async(req,res)=>{
     }
     
 
-    const comment =  await Comment.findByIdAndUpdate(
+    const comment = await Comment.findByIdAndUpdate(
         commentId,
         {
             $set:{

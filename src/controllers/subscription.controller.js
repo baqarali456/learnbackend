@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asynchandler";
 import { User } from "../models/user.model";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
+import { Subscription } from "../models/subscription.model";
 
 
 
@@ -70,31 +71,39 @@ const getUserChannelSubscribers = asyncHandler(async(req,res)=>{
         throw new ApiError(404, "channelId is not valid");
       }
 
-      const fetchUserchannelSubscribers = await User.aggregate([
+      const fetchUserchannelSubscribers = await Subscription.aggregate([
         {
             $match:{
-                _id:new mongoose.Schema.Types.ObjectId(channelId)
+                channel:new mongoose.Schema.Types.ObjectId(channelId)
             }
         },
         {
             $lookup:{
-                from:"subscriptions",
-                localField:"_id",
-                foreignField:"channel",
-                as:"UserChannelSubscribers"
-            }
+                from:"users",
+                localField:"subscriber",
+                foreignField:"_id",
+                as:"subscriber",
+                pipeline:[
+                  {
+                    $project:{
+                      username:1,
+                      avatar:1,
+                    }
+                  }
+                ]
+            },
         },
         {
           $addFields:{
-            UserChannelSubscribers:{
-                $first:"$UserChannelSubscribers"
+            subscriber:{
+                $first:"$subscriber"
             }
           }
         },
         {
             $project:{
-                UserChannelSubscribers:1,
-                username:1,
+                channel:1,
+                subscriber:1,
             }
         }
       ])
@@ -120,31 +129,39 @@ const getSubcribedChannels = asyncHandler(async(req,res)=>{
         throw new ApiError(404, "subscriberId is not valid");
       }
 
-      const fetchsubscribedChannels = await User.aggregate([
+      const fetchsubscribedChannels = await Subscription.aggregate([
         {
             $match:{
-                _id:new mongoose.Schema.Types.ObjectId(subscriberId)
+                subscriber:new mongoose.Schema.Types.ObjectId(subscriberId)
             }
         },
         {
             $lookup:{
-                from:"subscriptions",
-                localField:"_id",
-                foreignField:"subscriber",
-                as:"UserSubcribedChannels"
-            }
+                from:"users",
+                localField:"channel",
+                foreignField:"_id",
+                as:"channel",
+                pipeline:[
+                  {
+                    $project:{
+                      username:1,
+                      avatar:1,
+                    }
+                  }
+                ]
+            },
         },
         {
           $addFields:{
-            UserSubcribedChannels:{
-                $first:"$UserSubcribedChannels"
+            channel:{
+                $first:"$channel"
             }
           }
         },
         {
             $project:{
-                UserSubcribedChannels:1,
-                username:1,
+                channel:1,
+                subscriber:1,
             }
         }
       ])

@@ -8,8 +8,19 @@ import { User } from "../models/user.model.js";
 
 const getAllVideos = asyncHandler(async(req,res)=>{
     const {page = 1,limit=20,query,sortBy,sortType,userId} = req.query;
-    await Video.aggregatePaginate([
-
+    
+    const allvideos = await Video.aggregate([
+        {
+            $match:{
+                owner:userId,
+            }
+        },
+        {
+            $limit:20
+        },
+        {
+            $skip: (page - 1) * limit,
+        }
     ])
 })
 

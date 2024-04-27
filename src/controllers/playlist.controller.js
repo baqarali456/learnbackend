@@ -1,6 +1,5 @@
 import mongoose, { isValidObjectId } from "mongoose";
 import { asyncHandler } from "../utils/asynchandler.js";
-import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Playlist } from "../models/playlist.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -39,15 +38,52 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
     if (!isvaliduserId) {
         throw new ApiError(401, "userId is not valid")
     }
-    
 
-    const findUserPlaylist = await Playlist.find({ owner: userId }, { videos: 1, name: 1, description: 1, _id: 0 });
+   const userPlaylists = await Playlist.aggregate([
+        {
+            $match:{
+                owner: new mongoose.Schema.Types.ObjectId(userId)
+            }
+        },
+        {
+            $lookup:{
+                from:"videos",
+                localField:"videos",
+                foreignField:"_id",
+                as:"videos",
+                pipeline:[
+                    {
+                        lookup:{
+                            from:"users",
+                            localField:"owner",
+                            foreignField:"_id",
+                            as:"owner",
+                            pipeline:[
+                                {
+                                    $project:{
+                                        username:1,
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $project:{
+                name:1,
+                description:1,
+                owner:1,
+            }
+        }
+    ])
 
 
     return res
         .status(200)
         .json(
-            new ApiResponse(200, findUserPlaylist, "User playlist fetchedSuccessFully")
+            new ApiResponse(200, userPlaylists.length > 0 ?userPlaylists:"No playlist create by this user", "User playlist fetchedSuccessFully")
         )
 
 
@@ -66,13 +102,57 @@ const getPlaylistById = asyncHandler(async (req, res) => {
     }
    
 
-    const findUserPlaylist = await Playlist.findOne({ _id: playlistId }, { videos: 1, name: 1, description: 1, _id: 0 });
+    const findUserPlaylist = await Playlist.findOne({ _id: playlistId });
+    if(!findUserPlaylist){
+        throw new ApiError(404,"playlist not found")
+    }
+
+   const userPlaylist = await Playlist.aggregate([
+        {
+            $match:{
+                _id:new mongoose.Schema.Types.ObjectId(playlistId)
+            }
+        },
+        {
+         $lookup:{
+            from:"videos",
+            localField:"videos",
+            foreignField:"_id",
+            as:"videos",
+            pipeline:[
+                {
+                    lookup:{
+                        from:"users",
+                        localField:"owner",
+                        foreignField:"_id",
+                        as:"owner",
+                        pipeline:[
+                            {
+                                $project:{
+                                    username:1,
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+         }
+        },
+        {
+            $project:{
+                name:1,
+                description:1,
+                videos:1,
+            }
+        }
+    ])
+
 
 
     return res
         .status(200)
         .json(
-            new ApiResponse(200, findUserPlaylist, "User playlist fetchedSuccessFully")
+            new ApiResponse(200, userPlaylist, "User playlist fetchedSuccessFully")
         )
 })
 

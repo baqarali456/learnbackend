@@ -13,6 +13,10 @@ const createTweet = asyncHandler(async (req, res) => {
   if (!content?.trim()) {
     throw new ApiError(401, "content is required")
   }
+   const user = await User.findById(req.user?._id)
+   if(!user){
+    throw new ApiError(404,"user not found")
+   }
   const tweet = await Tweet.create({
     content,
     owner: req.user?._id,
