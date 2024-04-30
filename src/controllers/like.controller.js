@@ -31,14 +31,14 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
         from: "likes",
         localField: "_id",
         foreignField: "video",
-        as: "LikedVideos",
+        as: "LikedVideo",
       },
     },
     {
       $addFields: {
         isLikeVideo: {
           $cond: {
-            if: { $in: [req.user?._id, "$LikedVideos.likedBy"] },
+            if: { $in: [req.user?._id, "$LikedVideo.likedBy"] },
             then: true,
             else: false,
           },
