@@ -16,25 +16,33 @@ const getVideoComments = asyncHandler(async(req,res)=>{
     if(!isValidVideoId){
         throw new ApiError(401,"video Id is not valid")
     }
+
+    const video = await Video.findById(videoId,{title:1})
      
-    const allcommentsonVideo = await Comment.aggregate([
+    const commentaggregate = await Comment.aggregate([
         {
             $match:{
                 video:new mongoose.Schema.Types.ObjectId(videoId)
             }
         },
+    ]);
+
+    const allcommentsonVideo = await  Comment.aggregatePaginate(
+        commentaggregate,
         {
-          $limit: parseInt(limit) 
-        },
-        {
-            $skip:(page - 1) * limit,
+            page:Math.max(page,1),
+            limit:Math.max(limit,1),
+            customLabels:{
+                totalDocs:"VideocommentsbyQuery",
+                docs:"totalVideoComments"
+            }
         }
-    ])
+    )
 
     return res
     .status(200)
     .json(
-        new ApiResponse(200,allcommentsonVideo,"get successfully comments on video")
+        new ApiResponse(200,{allcommentsonVideo,videodetails:video},"get successfully comments on video")
     )
 })
 

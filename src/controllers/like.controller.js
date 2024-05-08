@@ -2,7 +2,6 @@ import { isValidObjectId } from "mongoose";
 import mongoose from "mongoose";
 import { asyncHandler } from "../utils/asynchandler.js";
 import { ApiError } from "../utils/ApiError.js";
-import Like from "../models/likes.model.js";
 import { Video } from "../models/video.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Comment } from "../models/comment.model.js";
@@ -19,6 +18,7 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
   if (!isValidvideoId) {
     throw new ApiError(404, "videoId is not valid");
   }
+  
 
   const VideoLikestoggle = await Video.aggregate([
     {

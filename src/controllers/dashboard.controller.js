@@ -4,7 +4,7 @@ import { Video } from "../models/video.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Subscription } from "../models/subscription.model.js";
 import { ApiError } from "../utils/ApiError.js";
-import Like from "../models/likes.model.js"
+
 
 
 
@@ -15,7 +15,7 @@ const getChannelStats = asyncHandler(async (req, res) => {
         const videos = await Video.find({ owner: req.user?._id })
         const totalViews = videos.reduce((acc, video) => acc + video.views, 0);
         const totalvideos = videos.length;
-        const useruploadedVideos = videos.map(video => video._id);
+        // const useruploadedVideos = videos.map(video => video._id);
 
 
         const findChannelSubscribers = await Subscription.find({ channel: req.user?._id });
